@@ -73,3 +73,4 @@ module.exports = parseCommand
 // 触发事件 -> 改变dom 原生时代
 // 触发事件 -> 改变数据 -> 数据重新渲染dom  vue、react
 // ob = [['dir', './pages'],['file','./pages/App.js']]
+
