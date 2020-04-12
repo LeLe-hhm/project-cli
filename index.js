@@ -4,6 +4,9 @@
 const { program } = require('commander');
 // https://www.npmjs.com/package/download-git-repo
 const download = require('download-git-repo')
+const handlebars = require('handlebars')
+const inquirer = require('inquirer')
+const fs = require('fs')
 const templates = {
   'tmp-a': {
     'url': 'https://github.com/LeLe-hhm/template-a',
@@ -41,6 +44,42 @@ program
      */
     download(`${templates[templateName]['downlondUrl']}`, projectName, { clone: true }, function (err) {
       console.log(err ? '下载失败' : '下载成功')
+    })
+    /**
+     * 
+     * 把项目下的 package.json 文件读取出来
+     * 使用向导的方式采集用户输入的数据
+     * 使用模板引擎把用户输入的数据解析到 package.json 文件
+     * 解析完毕，把解析之后的结果重新写入 package.josn 文件
+     * 
+     * 
+     */
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name', // 用户作答时，作为答案的key值
+        message: '请输入项目名称'
+      }, {
+        type: 'input',
+        name: 'description',
+        message: '请输入项目简介'
+      }, {
+        type: 'input',
+        name: 'author',
+        message: '请输入作者'
+      }
+    ]).then(answer => {
+      // 获取用户输入内容
+      // console.log(answer)
+      // 把采集到的用户输入数据解析替换到 package.json 文件中
+      const path = `${projectName}/package.json`
+      // 读取文件内容
+      const content = fs.readFileSync(path, 'utf8')
+      // 用模板把数据解析进去
+      const result = handlebars.compile(content)(answer)
+      // 把填充了数据的模板，重新写入到文件中
+      fs.writeFileSync(path, result)
+      console.log('初始化模板成功')
     })
   })
 
