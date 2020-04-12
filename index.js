@@ -4,8 +4,16 @@
 const { program } = require('commander');
 // https://www.npmjs.com/package/download-git-repo
 const download = require('download-git-repo')
-const handlebars = require('handlebars')
-const inquirer = require('inquirer')
+// https://github.com/handlebars-lang/handlebars.js
+const handlebars = require('handlebars') // 模板
+// https://github.com/SBoudrias/Inquirer.js
+const inquirer = require('inquirer') // 交互
+// https://github.com/sindresorhus/ora
+const ora = require('ora') // 加载loading 
+// https://github.com/chalk/chalk
+const chalk = require('chalk') // console文案添加颜色
+// https://github.com/sindresorhus/log-symbols
+const logSymbols = require('log-symbols') // icon图标
 const fs = require('fs')
 const templates = {
   'tmp-a': {
@@ -37,13 +45,18 @@ program
   .command('init <template> <project>')
   .description('初始化项目')
   .action((templateName, projectName) => {
+    const spinner = ora('正在下载模板....').start()
     /**
      * 模板下载
      * 参数1: 模板下载地址
      * 参数2: 文件目录
      */
     download(`${templates[templateName]['downlondUrl']}`, projectName, { clone: true }, function (err) {
-      console.log(err ? '下载失败' : '下载成功')
+      if (err) {
+        spinner.fail() // 下载失败提示
+        console.log(logSymbols.error, chalk.red(err))
+      }
+      console.log(logSymbols.success, chalk.red('模板下载成功'))
     })
     /**
      * 
@@ -79,7 +92,7 @@ program
       const result = handlebars.compile(content)(answer)
       // 把填充了数据的模板，重新写入到文件中
       fs.writeFileSync(path, result)
-      console.log('初始化模板成功')
+      console.log(logSymbols.success, chalk.green('初始化模板成功'))
     })
   })
 
